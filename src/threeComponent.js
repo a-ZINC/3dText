@@ -2,13 +2,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import fontTypeface from 'three/examples/fonts/helvetiker_bold.typeface.json';
-import baseImage from './texture/Sci-fi_Floor_003_basecolor.jpg';
-import aoImage from './texture/Sci-fi_Floor_003_ambientOcclusion.jpg';
-import normalImage from './texture/Sci-fi_Floor_003_normal.jpg';
-import roughnessImage from './texture/Sci-fi_Floor_003_roughness.jpg';
-import heightImage from './texture/Sci-fi_Floor_003_height.png';
-import metallicImage from './texture/Sci-fi_Floor_003_metallic.jpg';
+import baseImage from './texture/base.jpg';
+import aoImage from './texture/ao.jpg';
+import normalImage from './texture/normal.jpg';
+import roughnessImage from './texture/rough.jpg';
+import heightImage from './texture/displacement.png';
 
 console.log(fontTypeface);
 const canvas = document.querySelector('.webgl');
@@ -50,7 +50,25 @@ const textureLoader = new THREE.TextureLoader();
 
 
 const baseTexture = textureLoader.load(baseImage);
-
+baseTexture.wrapS = THREE.RepeatWrapping;
+baseTexture.wrapT = THREE.RepeatWrapping;
+baseTexture.repeat.set(2, 2);
+const aoTexture = textureLoader.load(aoImage);
+aoTexture.wrapS = THREE.RepeatWrapping;
+aoTexture.wrapT = THREE.RepeatWrapping;
+aoTexture.repeat.set(2, 2);
+const normalTexture = textureLoader.load(normalImage);
+normalTexture.wrapS = THREE.RepeatWrapping;
+normalTexture.wrapT = THREE.RepeatWrapping;
+normalTexture.repeat.set(2, 2);
+const roughnessTexture = textureLoader.load(roughnessImage);
+roughnessTexture.wrapS = THREE.RepeatWrapping;
+roughnessTexture.wrapT = THREE.RepeatWrapping;
+roughnessTexture.repeat.set(2, 2);
+const heightTexture = textureLoader.load(heightImage);
+heightTexture.wrapS = THREE.RepeatWrapping;
+heightTexture.wrapT = THREE.RepeatWrapping;
+heightTexture.repeat.set(2, 2);
 
 const group = new THREE.Group();
 scene.add(group);
@@ -59,6 +77,12 @@ scene.add(group);
 const donutGeometry = new THREE.TorusGeometry(1, 0.4, 10, 100);
 const basicMaterial = new THREE.MeshStandardMaterial();
 basicMaterial.map = baseTexture;
+basicMaterial.metalness = 0.5;
+basicMaterial.roughness = 0.4;
+basicMaterial.displacementMap = heightTexture;
+basicMaterial.displacementScale = 0.3;
+
+
 // basicMaterial.wireframe = true;
 // group.add(donut);
 
@@ -111,8 +135,21 @@ scene.add(perspectiveCamera);
 const controls = new OrbitControls(perspectiveCamera, canvas);
 controls.enableDamping = true;
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+// scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0x0000ff, 1);
+directionalLight.position.set(0, 0, 1);
+scene.add(directionalLight);
+
+const rectLight = new THREE.RectAreaLight(0xFFFFFF, 1, 8, 1);
+rectLight.position.set(0, -1, 1);
+rectLight.rotation.x = Math.PI / 4;
+
+scene.add(rectLight);
+
+// const rectlightHelper = new RectAreaLightHelper(rectLight);
+// scene.add(rectlightHelper);
 
 const renderer = new THREE.WebGLRenderer({canvas:canvas});
 renderer.setSize(sizes.width, sizes.height);
